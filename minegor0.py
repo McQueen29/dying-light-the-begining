@@ -2,6 +2,7 @@ import sys
 import pygame
 import os
 import PyQt5
+import random
 
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
@@ -93,6 +94,19 @@ class Player(pygame.sprite.Sprite):
                 self.rect.y += 25
 
 
+class Bullet(pygame.sprite.Sprite):
+    image = load_image('bullet.png')
+
+    def __init__(self):
+        super().__init__(bullet_group, all_sprites)
+        self.image = Bullet.image
+        self.rect = self.image.get_rect()
+        self.rect = self.rect.move(player.rect.x + 75, player.rect.y + 25)
+
+    def update(self):
+        self.rect.x += 5
+
+
 def load_level(filename):
     filename = 'levels/' + filename
     with open(filename, 'r', encoding='utf-8') as mapfile:
@@ -111,28 +125,100 @@ def generate_level(level):
     return new_player, x, y
 
 
+class Zombie(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__(zombie_group, all_sprites)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+        self.cnt = -1
+        if x <= 1:
+            self.to = 'right'
+        else:
+            self.to = 'left'
+        self.hp = 3
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.image = self.frames[self.cur_frame]
+
+    def run(self):
+        if self.to == 'left':
+            self.rect.x -= 1
+        else:
+            self.rect.x += 1
+        if pygame.sprite.spritecollideany(self, bullet_group):
+            self.hp -= 1
+            if self.hp == 0:
+                self.kill()
+            x = bullets[self.cnt]
+            x.kill()
+            self.cnt -= 1
+
+
+
 if __name__ == '__main__':
     width = 800
     height = 600
     tile_width = tile_height = 30
+    pygame.display.set_caption('minegor')
 
     running = True
 
     clock = pygame.time.Clock()
-    # start_screen()
+    start_screen()
+
     player_group = pygame.sprite.Group()
-    pygame.display.set_caption('minegor')
+    bullet_group = pygame.sprite.Group()
     all_sprites = pygame.sprite.Group()
+    zombie_group = pygame.sprite.Group()
+
     fon = Fon()
+
     player, level_x, level_y = generate_level(load_level('level1'))
+
+    zombie = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 770, 380)
+    zombie1 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 800, 405)
+    zombie2 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 830, 430)
+    zombie3 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 860, 455)
+    # x = random.choice([1, 750])
+    # if x == 750:
+    #    zombie = Zombie(load_image("zombie_to_left_2.png"), 6, 1, x, 450)
+    # else:
+    #    zombie = Zombie(load_image("zombie_to_right.png"), 6, 1, x, 450)
+    cnt = -1
+    bullets = [0] * 100
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                player_group.update(event.key)
+                if event.key == pygame.K_SPACE:
+                    bullets[cnt] = Bullet()
+                    cnt -= 1
+                else:
+                    player_group.update(event.key)
         player_group.draw(screen)
         all_sprites.draw(screen)
+        zombie_group.draw(screen)
+        bullet_group.draw(screen)
+        bullet_group.update()
+        zombie.run()
+        zombie1.run()
+        zombie2.run()
+        zombie3.run()
+        zombie_group.update()
         pygame.display.flip()
-        clock.tick(100)
+        clock.tick(20)
     pygame.quit()
