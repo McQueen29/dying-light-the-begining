@@ -101,10 +101,15 @@ class Bullet(pygame.sprite.Sprite):
         super().__init__(bullet_group, all_sprites)
         self.image = Bullet.image
         self.rect = self.image.get_rect()
-        self.rect = self.rect.move(player.rect.x + 75, player.rect.y + 25)
+        if player.image == Player.image_left:
+            self.to = -1
+            self.rect = self.rect.move(player.rect.x, player.rect.y + 25)
+        else:
+            self.rect = self.rect.move(player.rect.x + 75, player.rect.y + 25)
+            self.to = 1
 
     def update(self):
-        self.rect.x += 5
+        self.rect.x += 5 * self.to
 
 
 def load_level(filename):
@@ -152,20 +157,18 @@ class Zombie(pygame.sprite.Sprite):
     def update(self):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
-
-    def run(self):
         if self.to == 'left':
             self.rect.x -= 1
         else:
             self.rect.x += 1
-        if pygame.sprite.spritecollideany(self, bullet_group):
+        x = bullets[self.cnt]
+        if pygame.sprite.spritecollideany(self, bullet_group) and x[1] - 10 == self.rect.y:
             self.hp -= 1
             if self.hp == 0:
                 self.kill()
-            x = bullets[self.cnt]
-            x.kill()
+                zombie_group.draw(screen)
+            x[0].kill()
             self.cnt -= 1
-
 
 
 if __name__ == '__main__':
@@ -205,7 +208,7 @@ if __name__ == '__main__':
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    bullets[cnt] = Bullet()
+                    bullets[cnt] = (Bullet(), player.rect.y)
                     cnt -= 1
                 else:
                     player_group.update(event.key)
@@ -214,10 +217,6 @@ if __name__ == '__main__':
         zombie_group.draw(screen)
         bullet_group.draw(screen)
         bullet_group.update()
-        zombie.run()
-        zombie1.run()
-        zombie2.run()
-        zombie3.run()
         zombie_group.update()
         pygame.display.flip()
         clock.tick(20)
