@@ -100,6 +100,7 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__(bullet_group, all_sprites)
         self.image = Bullet.image
+        self.cnt = 0
         self.rect = self.image.get_rect()
         if player.image == Player.image_left:
             self.to = -1
@@ -112,6 +113,11 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.x < 800 and self.rect.x > 0:
             self.rect.x += 10 * self.to
         else:
+            self.kill()
+        if pygame.sprite.spritecollideany(self, zombie_group):
+            self.cnt += 1
+        if pygame.sprite.spritecollideany(self, zombie_group) and self.cnt == 4:
+            self.cnt = 0
             self.kill()
 
 
@@ -146,7 +152,7 @@ class Zombie(pygame.sprite.Sprite):
             self.to = 'right'
         else:
             self.to = 'left'
-        self.hp = 15
+        self.hp = 9
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
@@ -192,14 +198,60 @@ if __name__ == '__main__':
     fon = Fon()
 
     player, level_x, level_y = generate_level(load_level('level1'))
-
+    #first_wave
     zombie = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 770, 380)
-    zombie1 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 800, 440)
+    zombie1 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 780, 440)
     zombie2 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 800, 500)
+    zombie3 = Zombie(load_image("zombie_to_right.png"), 6, 1, 0, 380)
+    zombie4 = Zombie(load_image("zombie_to_right.png"), 6, 1, -14, 440)
+    zombie5 = Zombie(load_image("zombie_to_right.png"), 6, 1, -25, 500)
+    #second_wave
+    zombie6 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 900, 380)
+    zombie7 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 910, 440)
+    zombie8 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 950, 500)
+    zombie9 = Zombie(load_image("zombie_to_right.png"), 6, 1, -142, 380)
+    zombie10 = Zombie(load_image("zombie_to_right.png"), 6, 1, -120, 440)
+    zombie11 = Zombie(load_image("zombie_to_right.png"), 6, 1, -180, 500)
+
+    zombie12 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 960, 380)
+    zombie13 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 990, 440)
+    zombie14 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1000, 500)
+    zombie15 = Zombie(load_image("zombie_to_right.png"), 6, 1, -200, 380)
+    zombie16 = Zombie(load_image("zombie_to_right.png"), 6, 1, -220, 440)
+    zombie17 = Zombie(load_image("zombie_to_right.png"), 6, 1, -250, 500)
+    #third_wave
+    zombie18 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1200, 380)
+    zombie19 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1230, 440)
+    zombie20 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1200, 500)
+    zombie21 = Zombie(load_image("zombie_to_right.png"), 6, 1, -400, 380)
+    zombie22 = Zombie(load_image("zombie_to_right.png"), 6, 1, -380, 440)
+    zombie23 = Zombie(load_image("zombie_to_right.png"), 6, 1, -400, 500)
+
+    zombie24 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1300, 380)
+    zombie25 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1330, 440)
+    zombie26 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1300, 500)
+    zombie27 = Zombie(load_image("zombie_to_right.png"), 6, 1, -500, 380)
+    zombie28 = Zombie(load_image("zombie_to_right.png"), 6, 1, -520, 440)
+    zombie29 = Zombie(load_image("zombie_to_right.png"), 6, 1, -500, 500)
+
+    zombie30 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1400, 380)
+    zombie31 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1430, 440)
+    zombie32 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1400, 500)
+    zombie33 = Zombie(load_image("zombie_to_right.png"), 6, 1, -600, 380)
+    zombie34 = Zombie(load_image("zombie_to_right.png"), 6, 1, -620, 440)
+    zombie35 = Zombie(load_image("zombie_to_right.png"), 6, 1, -600, 500)
+
+    zombie36 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1500, 380)
+    zombie37 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1530, 440)
+    zombie38 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 1500, 500)
+    zombie39 = Zombie(load_image("zombie_to_right.png"), 6, 1, -730, 380)
+    zombie40 = Zombie(load_image("zombie_to_right.png"), 6, 1, -750, 440)
+    zombie41 = Zombie(load_image("zombie_to_right.png"), 6, 1, -730, 500)
+
 
     cnt = -1
     cnt_for_bullets = -1
-    bullets = [0] * 100
+    bullets = [0] * 1000
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
