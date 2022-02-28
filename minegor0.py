@@ -75,25 +75,23 @@ class Player(pygame.sprite.Sprite):
         super().__init__(player_group, all_sprites)
         self.image = Player.image_front
         self.rect = self.image.get_rect()
-        self.rect = self.rect.move(tile_width * pos_x, tile_height * pos_y)
+        self.rect = self.rect.move(tile_height * pos_x - 20, tile_height * pos_y)
 
     def update(self, key):
         if key == pygame.K_UP:
             if self.rect.y > 400:
-                self.rect.y -= 25
+                self.rect.y -= 60
         elif key == pygame.K_LEFT:
             if self.rect.x > 0:
                 self.image = Player.image_left
-                self.rect.x -= 25
+                self.rect.x -= 30
         elif key == pygame.K_RIGHT:
             if self.rect.x < 750:
                 self.image = Player.image_right
-                self.rect.x += 25
+                self.rect.x += 30
         elif key == pygame.K_DOWN:
-            if self.rect.y < 450:
-                self.rect.y += 25
-        if pygame.sprite.spritecollideany(self, zombie_group):
-            exit()
+            if self.rect.y < 500:
+                self.rect.y += 60
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -111,7 +109,10 @@ class Bullet(pygame.sprite.Sprite):
             self.to = 1
 
     def update(self):
-        self.rect.x += 10 * self.to
+        if self.rect.x < 800 and self.rect.x > 0:
+            self.rect.x += 10 * self.to
+        else:
+            self.kill()
 
 
 def load_level(filename):
@@ -145,7 +146,7 @@ class Zombie(pygame.sprite.Sprite):
             self.to = 'right'
         else:
             self.to = 'left'
-        self.hp = 3
+        self.hp = 15
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
@@ -157,21 +158,19 @@ class Zombie(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def update(self):
-        global cnt_for_bullets
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
         if self.to == 'left':
             self.rect.x -= 1
         else:
             self.rect.x += 1
-        x = bullets[cnt_for_bullets]
-        if pygame.sprite.spritecollideany(self, bullet_group) and x[1] - 10 == self.rect.y:
+        if pygame.sprite.spritecollideany(self, bullet_group):
             self.hp -= 1
             if self.hp == 0:
                 self.kill()
                 zombie_group.draw(screen)
-            x[0].kill()
-            cnt_for_bullets -= 1
+        if pygame.sprite.spritecollideany(self, player_group):
+            exit()
 
 
 if __name__ == '__main__':
@@ -195,9 +194,9 @@ if __name__ == '__main__':
     player, level_x, level_y = generate_level(load_level('level1'))
 
     zombie = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 770, 380)
-    zombie1 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 800, 405)
-    zombie2 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 830, 430)
-    zombie3 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 860, 455)
+    zombie1 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 800, 440)
+    zombie2 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 800, 500)
+
     cnt = -1
     cnt_for_bullets = -1
     bullets = [0] * 100
