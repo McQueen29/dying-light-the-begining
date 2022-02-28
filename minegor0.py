@@ -92,6 +92,8 @@ class Player(pygame.sprite.Sprite):
         elif key == pygame.K_DOWN:
             if self.rect.y < 450:
                 self.rect.y += 25
+        if pygame.sprite.spritecollideany(self, zombie_group):
+            exit()
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -109,7 +111,7 @@ class Bullet(pygame.sprite.Sprite):
             self.to = 1
 
     def update(self):
-        self.rect.x += 5 * self.to
+        self.rect.x += 10 * self.to
 
 
 def load_level(filename):
@@ -138,7 +140,7 @@ class Zombie(pygame.sprite.Sprite):
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(x, y)
-        self.cnt = -1
+
         if x <= 1:
             self.to = 'right'
         else:
@@ -155,20 +157,21 @@ class Zombie(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def update(self):
+        global cnt_for_bullets
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
         if self.to == 'left':
             self.rect.x -= 1
         else:
             self.rect.x += 1
-        x = bullets[self.cnt]
+        x = bullets[cnt_for_bullets]
         if pygame.sprite.spritecollideany(self, bullet_group) and x[1] - 10 == self.rect.y:
             self.hp -= 1
             if self.hp == 0:
                 self.kill()
                 zombie_group.draw(screen)
             x[0].kill()
-            self.cnt -= 1
+            cnt_for_bullets -= 1
 
 
 if __name__ == '__main__':
@@ -195,12 +198,8 @@ if __name__ == '__main__':
     zombie1 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 800, 405)
     zombie2 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 830, 430)
     zombie3 = Zombie(load_image("zombie_to_left_2.png"), 6, 1, 860, 455)
-    # x = random.choice([1, 750])
-    # if x == 750:
-    #    zombie = Zombie(load_image("zombie_to_left_2.png"), 6, 1, x, 450)
-    # else:
-    #    zombie = Zombie(load_image("zombie_to_right.png"), 6, 1, x, 450)
     cnt = -1
+    cnt_for_bullets = -1
     bullets = [0] * 100
     while running:
         for event in pygame.event.get():
@@ -219,5 +218,5 @@ if __name__ == '__main__':
         bullet_group.update()
         zombie_group.update()
         pygame.display.flip()
-        clock.tick(20)
+        clock.tick(30)
     pygame.quit()
